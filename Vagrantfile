@@ -9,7 +9,12 @@ Vagrant.configure("2") do |config|
   # The most common configuration options are documented and commented below.
   # For a complete reference, please see the online documentation at
   # https://docs.vagrantup.com.
-
+  ssh_pub_key = File.readlines("#{Dir.home}/.ssh/id_rsa.pub").first.strip
+  config.vm.provision "file", source: "~/.ssh/id_rsa.pub", destination: "~/.ssh/id_rsa.pub"
+  config.vm.provision "file", source: "~/.ssh/id_rsa", destination: "~/.ssh/id_rsa"
+  config.vm.provision "shell", inline: <<-SHELL
+    cat /home/vagrant/.ssh/id_rsa.pub >> /home/vagrant/.ssh/authorized_keys
+  SHELL
   # Every Vagrant development environment requires a box. You can search for
   # boxes at https://vagrantcloud.com/search.
   config.vm.box = "ubuntu/focal64"
@@ -54,7 +59,7 @@ Vagrant.configure("2") do |config|
   config.vm.provider "virtualbox" do |vb|
     # Display the VirtualBox GUI when booting the machine
     vb.gui = true
-  
+    vb.name = "foxy_box"
     # Customize the amount of memory on the VM:
     vb.memory = "4096"
 
@@ -86,7 +91,8 @@ Vagrant.configure("2") do |config|
     sudo sh -c 'echo "deb [arch=$(dpkg --print-architecture)] http://packages.ros.org/ros2/ubuntu $(lsb_release -cs) main" > /etc/apt/sources.list.d/ros2-latest.list'
 
     echo "Installing ROS 2 packages \n"
-    export CHOOSE_ROS_DISTRO=foxy
+    echo "export CHOOSE_ROS_DISTRO=foxy" >> ~/.bashrc
+    source ~/.bashrc
     sudo apt-get update
     sudo apt-get install -y ros-$CHOOSE_ROS_DISTRO-desktop
     sudo apt-get install -y ros-$CHOOSE_ROS_DISTRO-ros-base
@@ -95,11 +101,45 @@ Vagrant.configure("2") do |config|
     sudo apt install -y python3-pip
     pip3 install -U argcomplete
 
+    export CHOOSE_ROS_DISTRO=foxy
     source /opt/ros/$CHOOSE_ROS_DISTRO/setup.bash
     echo "source /opt/ros/$CHOOSE_ROS_DISTRO/setup.bash" >> ~/.bashrc
 
+    ####ROS2 swarm installation: https://github.com/ROS2swarm/ROS2swarm/blob/master/INSTALL_GUIDE.md
     sudo apt-get update
+    # Install colcon, Gazebo, Navigation2
+    sudo apt -y  install python3-colcon-common-extensions
+    sudo apt -y install ros-foxy-gazebo-ros-pkgs ros-foxy-cartographer  ros-foxy-cartographer-ros
+    sudo apt -y install ros-foxy-navigation2 ros-foxy-nav2-bringup
     # sudo apt-get install -y ros-$CHOOSE_ROS_DISTRO-rmw-opensplice-cpp # for OpenSplice
     # sudo apt-get install -y ros-$CHOOSE_ROS_DISTRO-rmw-connext-cpp # for RTI Connext (requires license agreement)
+    ########################################################################################
+    #######################Install turtlebot3##############################################
+    mkdir -p ~/turtlebot3_ws/src
+    cd ~/turtlebot3_ws/src/
+    git clone -b foxy-devel https://github.com/ROBOTIS-GIT/turtlebot3_msgs.git
+    git clone -b foxy-devel https://github.com/ROBOTIS-GIT/turtlebot3.git
+    sudo apt install ros-foxy-dynamixel-sdk -y
+    cd ~/turtlebot3_ws && colcon build --symlink-install
+    echo 'source ~/turtlebot3_ws/install/setup.bash' >> ~/.bashrc
+    echo 'export ROS_DOMAIN_ID=30 #TURTLEBOT3' >> ~/.bashrc
+    ####Switch to supported commits
+    cd ~/turtlebot3_ws/src/
+    git clone -b foxy-devel https://github.com/ROBOTIS-GIT/turtlebot3_simulations.git
+    cd  ~/turtlebot3_ws/src/turtlebot3
+    git checkout 8237b796ea1571033bf3230fbc78d1143968ddd1
+    cd ~/turtlebot3_ws/src/turtlebot3_msgs
+    git checkout cf5c56be94b335b1d2c9817bd2dcaceec21ccc68
+    echo 'export GAZEBO_MODEL_PATH=$GAZEBO_MODEL_PATH:~/turtlebot3_ws/src/turtlebot3_simulations/turtlebot3_gazebo/models' >> ~/.bashrc
+    cd ~/turtlebot3_ws && colcon build --symlink-install
+    echo 'export TURTLEBOT3_MODEL=waffle_pi' >> ~/.bashrc
+    source ~/.bashrc
+    ########################################################################################
+    cd
+    git clone https://github.com/ROS2swarm/ROS2swarm.git
+    cd ~/ROS2swarm
+    colcon build --symlink-install
+    echo 'source ~/ROS2swarm/install/setup.bash' >> ~/.bashrc
+    source ~/.bashrc
   SHELL
 end
