@@ -10,8 +10,9 @@ Vagrant.configure("2") do |config|
   # For a complete reference, please see the online documentation at
   # https://docs.vagrantup.com.
   ssh_pub_key = File.readlines("#{Dir.home}/.ssh/id_rsa.pub").first.strip
-  config.vm.provision "file", source: "~/.ssh/id_rsa.pub", destination: "~/.ssh/id_rsa.pub"
-  config.vm.provision "file", source: "~/.ssh/id_rsa", destination: "~/.ssh/id_rsa"
+  #This is done for Github authentication to download the repositories
+  config.vm.provision "file", source: "~/.ssh/id_rsa.pub", destination: "/home/vagrant/.ssh/id_rsa.pub"
+  config.vm.provision "file", source: "~/.ssh/id_rsa", destination: "/home/vagrant/.ssh/id_rsa"
   config.vm.provision "shell", inline: <<-SHELL
     cat /home/vagrant/.ssh/id_rsa.pub >> /home/vagrant/.ssh/authorized_keys
   SHELL
@@ -50,8 +51,7 @@ Vagrant.configure("2") do |config|
   # the path on the host to the actual folder. The second argument is
   # the path on the guest to mount the folder. And the optional third
   # argument is a set of non-required options.
-  config.vm.synced_folder "./ros_ws", "/home/vagrant/ros_ws"
-
+  config.vm.synced_folder "./ros_ws/", "/home/vagrant/ros_ws/"
   # Provider-specific configuration so you can fine-tune various
   # backing providers for Vagrant. These expose provider-specific options.
   # Example for VirtualBox:
@@ -62,8 +62,8 @@ Vagrant.configure("2") do |config|
     vb.name = "foxy_box"
     # Customize the amount of memory on the VM:
     vb.memory = "4096"
-
-    vb.customize ["modifyvm", :id, "--graphicscontroller", "vmsvga"]
+    vb.cpus = 2
+    vb.customize ["modifyvm", :id, "--graphicscontroller", "vmsvga", "--natdnshostresolver1", "on", "--natdnsproxy1", "on", "--ioapic", "on"]
   end
   #
   # View the documentation for the provider you are using for more
@@ -72,7 +72,7 @@ Vagrant.configure("2") do |config|
   # Enable provisioning with a shell script. Additional provisioners such as
   # Puppet, Chef, Ansible, Salt, and Docker are also available. Please see the
   # documentation for more information about their specific syntax and use.
-  config.vm.provision "shell", inline: <<-SHELL
+  config.vm.provision "shell", privileged: false, inline: <<-SHELL
     sudo apt-get update
     sudo apt-get install -y ubuntu-desktop
     sudo apt-get install virtualbox-guest-dkms virtualbox-guest-utils virtualbox-guest-x11
@@ -91,55 +91,26 @@ Vagrant.configure("2") do |config|
     sudo sh -c 'echo "deb [arch=$(dpkg --print-architecture)] http://packages.ros.org/ros2/ubuntu $(lsb_release -cs) main" > /etc/apt/sources.list.d/ros2-latest.list'
 
     echo "Installing ROS 2 packages \n"
-    echo "export CHOOSE_ROS_DISTRO=foxy" >> ~/.bashrc
-    source ~/.bashrc
+    export CHOOSE_ROS_DISTRO=foxy
     sudo apt-get update
     sudo apt-get install -y ros-$CHOOSE_ROS_DISTRO-desktop
     sudo apt-get install -y ros-$CHOOSE_ROS_DISTRO-ros-base
+    echo "source /opt/ros/$CHOOSE_ROS_DISTRO/setup.bash" >> /home/vagrant/.bashrc
 
     echo "Installing optional argcomplete \n"
     sudo apt install -y python3-pip
     pip3 install -U argcomplete
 
-    export CHOOSE_ROS_DISTRO=foxy
-    source /opt/ros/$CHOOSE_ROS_DISTRO/setup.bash
-    echo "source /opt/ros/$CHOOSE_ROS_DISTRO/setup.bash" >> ~/.bashrc
+    sudo apt-get install -y ros-$CHOOSE_ROS_DISTRO-rmw-opensplice-cpp # for OpenSplice
+   # sudo apt-get install -y ros-$CHOOSE_ROS_DISTRO-rmw-connext-cpp # for RTI Connext (requires license agreement)
 
-    ####ROS2 swarm installation: https://github.com/ROS2swarm/ROS2swarm/blob/master/INSTALL_GUIDE.md
-    sudo apt-get update
     # Install colcon, Gazebo, Navigation2
+    sudo apt-get update
     sudo apt -y  install python3-colcon-common-extensions
     sudo apt -y install ros-foxy-gazebo-ros-pkgs ros-foxy-cartographer  ros-foxy-cartographer-ros
     sudo apt -y install ros-foxy-navigation2 ros-foxy-nav2-bringup
-    # sudo apt-get install -y ros-$CHOOSE_ROS_DISTRO-rmw-opensplice-cpp # for OpenSplice
-    # sudo apt-get install -y ros-$CHOOSE_ROS_DISTRO-rmw-connext-cpp # for RTI Connext (requires license agreement)
-    ########################################################################################
-    #######################Install turtlebot3##############################################
-    mkdir -p ~/turtlebot3_ws/src
-    cd ~/turtlebot3_ws/src/
-    git clone -b foxy-devel https://github.com/ROBOTIS-GIT/turtlebot3_msgs.git
-    git clone -b foxy-devel https://github.com/ROBOTIS-GIT/turtlebot3.git
-    sudo apt install ros-foxy-dynamixel-sdk -y
-    cd ~/turtlebot3_ws && colcon build --symlink-install
-    echo 'source ~/turtlebot3_ws/install/setup.bash' >> ~/.bashrc
-    echo 'export ROS_DOMAIN_ID=30 #TURTLEBOT3' >> ~/.bashrc
-    ####Switch to supported commits
-    cd ~/turtlebot3_ws/src/
-    git clone -b foxy-devel https://github.com/ROBOTIS-GIT/turtlebot3_simulations.git
-    cd  ~/turtlebot3_ws/src/turtlebot3
-    git checkout 8237b796ea1571033bf3230fbc78d1143968ddd1
-    cd ~/turtlebot3_ws/src/turtlebot3_msgs
-    git checkout cf5c56be94b335b1d2c9817bd2dcaceec21ccc68
-    echo 'export GAZEBO_MODEL_PATH=$GAZEBO_MODEL_PATH:~/turtlebot3_ws/src/turtlebot3_simulations/turtlebot3_gazebo/models' >> ~/.bashrc
-    cd ~/turtlebot3_ws && colcon build --symlink-install
-    echo 'export TURTLEBOT3_MODEL=waffle_pi' >> ~/.bashrc
-    source ~/.bashrc
-    ########################################################################################
-    cd
-    git clone https://github.com/ROS2swarm/ROS2swarm.git
-    cd ~/ROS2swarm
-    colcon build --symlink-install
-    echo 'source ~/ROS2swarm/install/setup.bash' >> ~/.bashrc
-    source ~/.bashrc
+
   SHELL
+  config.vm.provision 'shell', reboot: true
+
 end
