@@ -1,13 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="3bb09dd8-0e49-4fc7-8255-24b61bf4571e" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/ros_ws/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ros_ws/drone_publish/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ros_ws/drone_publish/drone_publish/DataFusionListener.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ros_ws/drone_publish/drone_publish/DroneTalker.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Vagrantfile" beforeDir="false" afterPath="$PROJECT_DIR$/Vagrantfile" afterDir="false" />
+    <list default="true" id="3bb09dd8-0e49-4fc7-8255-24b61bf4571e" name="Changes" comment="Initial project with publisher and subscriber&#10;Update Vagrantfile for stability">
+      <change afterPath="$PROJECT_DIR$/ros_ws/drone_publish/drone_publish/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -87,8 +83,16 @@
       <option name="presentableId" value="Default" />
       <updated>1670114004830</updated>
       <workItem from="1670114006139" duration="33529000" />
-      <workItem from="1670307528743" duration="3870000" />
+      <workItem from="1670307528743" duration="4181000" />
     </task>
+    <task id="LOCAL-00001" summary="Initial project with publisher and subscriber&#10;Update Vagrantfile for stability">
+      <created>1670311509846</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1670311509846</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -116,6 +120,10 @@
         </entry>
       </map>
     </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="Initial project with publisher and subscriber&#10;Update Vagrantfile for stability" />
+    <option name="LAST_COMMIT_MESSAGE" value="Initial project with publisher and subscriber&#10;Update Vagrantfile for stability" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/nxp_hovergames$DroneTalker.coverage" NAME="DroneTalker Coverage Results" MODIFIED="1670308933162" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />

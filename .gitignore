@@ -127,3 +127,5 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+/ros_ws/install/
+/ros_ws/log/
