@@ -18,9 +18,7 @@ class DataFusionListenerNode(Node):
 
 def main(args=None):
     rclpy.init(args=args)
-
     node = DataFusionListenerNode()
-
     rclpy.spin(node)
     rclpy.shutdown()
 

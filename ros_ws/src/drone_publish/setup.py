@@ -21,7 +21,9 @@ setup(
     entry_points={
         'console_scripts': [
             "DroneTalker = drone_publish.DroneTalker:main",
-            "DataFusionListener = drone_publish.DataFusionListener:main"
+            "DataFusionListener = drone_publish.DataFusionListener:main",
+            "SampleService = drone_publish.SampleService:main",
+            "DroneClient = drone_publish.DroneClient:main"
         ],
     },
 )
