@@ -116,6 +116,13 @@ Vagrant.configure("2") do |config|
     sudo apt-get update
     sudo apt install ros-foxy-ros-ign -y
 
+    #PX4 installations
+    cd ~
+    git clone https://github.com/PX4/Firmware.git --recursive
+    cd Firmware
+    bash ./Tools/setup/ubuntu.sh
+
+
   SHELL
   config.vm.provision 'shell', reboot: true
   #config.vm.provision "shell", path: "https://example.com/provisioner.sh"
